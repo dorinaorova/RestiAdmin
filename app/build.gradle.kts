@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -68,4 +70,11 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     implementation("androidx.navigation:navigation-compose:2.7.4")
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.5.0")
+
+    implementation("androidx.compose.material3:material3:1.2.0-alpha10")
+    implementation("androidx.compose.material3:material3-window-size-class:1.2.0-alpha10")
+
 }

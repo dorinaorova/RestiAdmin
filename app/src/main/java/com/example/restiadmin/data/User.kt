@@ -6,5 +6,8 @@ data class User(
     var email: String,
     var phone: String,
     var password: String?,
-    var birthDate: Long
+    var birthDate: Long,
+    var role: String,
+    var accessToken: String,
+    var tokenType: String
 )

@@ -55,6 +55,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.restiadmin.R
 import com.example.restiadmin.data.User
+import com.example.restiadmin.navigation.Screen
 import com.example.restiadmin.ui.theme.RestiAdminTheme
 import com.example.restiadmin.viewmodel.LoginViewModel
 
@@ -208,7 +209,7 @@ fun LoginPage(navController: NavController) {
                     onClick = {
                         password = passwordForm.value.text
                         email = emailForm.value.text
-                        var user = User(0,"", email,"", password,0)
+                        var user = User(0,"", email,"", password,0, "", "", "")
 
                         vm.login(user, navController, context)
 
@@ -234,7 +235,7 @@ fun LoginPage(navController: NavController) {
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(20.dp),
-                    onClick = { /*navController.navigate(route = Screen.SignUpScreen.route) */},
+                    onClick = { navController.navigate(route = Screen.SignUpScreen.route) },
                     style = TextStyle(
                         fontSize = 14.sp,
                         fontFamily = FontFamily.Default,

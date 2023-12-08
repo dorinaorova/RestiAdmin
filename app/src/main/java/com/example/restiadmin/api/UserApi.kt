@@ -7,32 +7,34 @@ import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.Headers
-import retrofit2.http.POST
+import retrofit2.http.Path
 
-private const val BASE_URL = "http://152.66.183.63:8080/auth/"
+private const val BASE_URL = "http://152.66.183.63:8080/user/"
+interface UserApi {
 
-interface LoginApi {
     @Headers("Accept: application/json")
-    @POST("login")
-    abstract fun login(@Body user: User) : Call<User?>?
-    @POST("signup/employee")
-
-    abstract fun signup(@Body user: User): Call<User>?
+    @GET("findbyid/{id}")
+    fun finById(@Path("id") id: Long) : Call<User>?
 
     companion object {
-        var apiService: LoginApi? = null
-        fun getInstance(): LoginApi {
+        var apiService: UserApi? = null
+        fun getInstance(context : Context): UserApi {
+            val authInterceptor = AuthInterceptor(context)
 
             if (apiService == null) {
                 apiService = Retrofit.Builder()
                     .baseUrl(BASE_URL)
+                    .client(
+                        OkHttpClient.Builder()
+                            .addInterceptor(authInterceptor)
+                            .build()
+                    )
                     .addConverterFactory(GsonConverterFactory.create())
-                    .build().create(LoginApi::class.java)
+                    .build().create(UserApi::class.java)
             }
             return apiService!!
         }
-
     }
 }

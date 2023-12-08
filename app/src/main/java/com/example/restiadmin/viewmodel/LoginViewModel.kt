@@ -33,8 +33,7 @@ class LoginViewModel: ViewModel() {
                 if(response?.isSuccessful == true){
                     _user.value = response.body()!!
                     navController.navigate(route = Screen.ProfileScreen.route)
-                    Log.d("response", _user.toString())
-                    val sharedPref : SharedPreferences = context.getSharedPreferences("PREFERENCE_NAME",MODE_PRIVATE)
+                    val sharedPref : SharedPreferences = context.getSharedPreferences("USER",MODE_PRIVATE)
                     val editor : SharedPreferences.Editor = sharedPref.edit()
                     editor.putLong("USER_ID", userId);
                     editor.putString("TOKEN", _user.value.accessToken)

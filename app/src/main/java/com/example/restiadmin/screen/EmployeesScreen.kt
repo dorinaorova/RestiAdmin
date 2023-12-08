@@ -1,5 +1,6 @@
 package com.example.restiadmin.screen
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -24,10 +26,8 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,10 +36,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,8 +48,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.restiadmin.R
-import com.example.restiadmin.data.MenuItem
-import com.example.restiadmin.data.User
+import com.example.restiadmin.data.UserInfo
 import com.example.restiadmin.screen.navbar.NavBar
 import com.example.restiadmin.ui.theme.RestiAdminTheme
 import com.example.restiadmin.viewmodel.EmployeesViewModel
@@ -58,8 +57,9 @@ import com.example.restiadmin.viewmodel.EmployeesViewModel
 private val vm = EmployeesViewModel()
 @Composable
 fun EmployeesScreen(navController: NavController){
+    val context = LocalContext.current
     LaunchedEffect(Unit, block ={
-
+        vm.fetchData(context)
     } )
 
     val openDialog = remember { mutableStateOf(false) }
@@ -84,12 +84,16 @@ fun EmployeesScreen(navController: NavController){
             }
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { openDialog.value=true },
-                containerColor = colorResource(id = R.color.dark_primary),
-            ) {
-                Icon(
-                    Icons.Default.Add, contentDescription = "Add",
-                    tint = colorResource(id = R.color.light_primary),)
+            if(vm.admin(context)) {
+                FloatingActionButton(
+                    onClick = { openDialog.value = true },
+                    containerColor = colorResource(id = R.color.dark_primary),
+                ) {
+                    Icon(
+                        Icons.Default.Add, contentDescription = "Add",
+                        tint = colorResource(id = R.color.light_primary),
+                    )
+                }
             }
         },
         bottomBar ={
@@ -100,6 +104,8 @@ fun EmployeesScreen(navController: NavController){
 
 @Composable
 private fun EmployeeList(){
+    val context = LocalContext.current
+    val color = colorResource(id = R.color.dark_primary)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -107,14 +113,44 @@ private fun EmployeeList(){
     ) {
         LazyColumn {
             items(vm.employees){ item ->
-                Employee(item)
+                Employee(item, false)
+            }
+        }
+        if(vm.employees.isNotEmpty() && vm.admin(context)) {
+            Canvas(
+                Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .padding(vertical = 20.dp)
+            ) {
+                drawLine(
+                    color = color,
+                    start = Offset(0f, 0f),
+                    end = Offset(size.width, 0f),
+                )
+            }
+        }
+        if(vm.admin(context)) {
+            LazyColumn {
+                items(vm.requests) { item ->
+                    Employee(
+                        UserInfo(
+                            item.user.id,
+                            item.user.name,
+                            item.user.email,
+                            item.user.phone,
+                            item.user.birthDate
+                        ), true
+                    )
+                }
             }
         }
     }
 }
 
+
 @Composable
-fun Employee(item: User){
+fun Employee(item: UserInfo, request: Boolean){
     Box (modifier = Modifier
         .padding(vertical = 12.dp, horizontal = 8.dp)
         .background(color = Color.White, shape = RoundedCornerShape(size = 16.dp))
@@ -138,30 +174,31 @@ fun Employee(item: User){
                         Modifier.padding(end=6.dp)
                     )
                     Text(
-                        text = item.phone,
+                        text = item.phone?: "",
                     )
                 }
             }
-            TextButton(onClick = { vm.deleteEmployee(item) }) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.baseline_delete_forever_24),
-                    contentDescription = null,
-                    tint = colorResource(id = R.color.dark_primary))
+//            TextButton(onClick = { vm.deleteEmployee(item.id) }) {
+//                Icon(
+//                    imageVector = ImageVector.vectorResource(R.drawable.baseline_delete_forever_24),
+//                    contentDescription = null,
+//                    tint = colorResource(id = R.color.dark_primary))
+//            }
+            if(request){
+                Text(text = "PENDING")
             }
+
         }
     }
 }
 
 @Composable
 private fun NewEmployeeDialog(onDismissRequest: () -> Unit){
+    val context = LocalContext.current
     var expanded by remember { mutableStateOf(false) }
-    //val items= vm.users
+    val items= vm.users
 
-    val items= listOf(
-        User(0L,"Name1","","","",0L, "", "", "bearer"),
-        User(0L,"Name2","","","",0L, "", "", "bearer")
-    )
-    var newEmployee by remember {mutableStateOf<User>(User(0L,"","","","",0L, "", "", "bearer"))}
+    var newEmployee by remember {mutableStateOf<UserInfo>(UserInfo(0L,"","","",0L))}
 
     Dialog(onDismissRequest = { onDismissRequest() }){
         Card(
@@ -209,7 +246,9 @@ private fun NewEmployeeDialog(onDismissRequest: () -> Unit){
                     }
                 }
 
-                Button(onClick = { /*vm.save(newEmployee)*/ onDismissRequest()},
+                Button(onClick = {
+                 vm.addEmployeeRequest(newEmployee.id, context)
+                 onDismissRequest()},
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.dark_primary)),
                 ) {
                     Text(text="Mentés")

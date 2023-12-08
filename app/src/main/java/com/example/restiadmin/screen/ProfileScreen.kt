@@ -19,19 +19,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Email
-import androidx.compose.material.icons.rounded.List
 import androidx.compose.material.icons.rounded.MailOutline
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material3.Button
@@ -43,6 +41,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +53,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -62,19 +62,18 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.restiadmin.R
 import com.example.restiadmin.data.MenuItem
 import com.example.restiadmin.data.Restaurant
 import com.example.restiadmin.data.TypeEnum
 import com.example.restiadmin.navController
+import com.example.restiadmin.navigation.Screen
 import com.example.restiadmin.screen.navbar.NavBar
 import com.example.restiadmin.ui.theme.RestiAdminTheme
 import com.example.restiadmin.viewmodel.ProfileViewModel
@@ -90,6 +89,10 @@ private var enabled = mutableStateOf(name.value.isNotEmpty() )
 
 @Composable
 fun ProfileScreen(navController: NavController){
+    val context = LocalContext.current
+    LaunchedEffect(Unit, block ={
+        vm.fetchDatas(context)
+    } )
 
     val openDialog = remember { mutableStateOf(false) }
 
@@ -133,6 +136,7 @@ fun ProfileScreen(navController: NavController){
 
 @Composable
 private fun NewRestaurantDialog(onDismissRequest: () -> Unit){
+    val context = LocalContext.current
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
             modifier = Modifier
@@ -160,7 +164,10 @@ private fun NewRestaurantDialog(onDismissRequest: () -> Unit){
                 DataField("Nyitás",4, ImeAction.Next, ImageVector.vectorResource(R.drawable.baseline_access_time_filled_24))
                 DataField("Zárás",5, ImeAction.Done, ImageVector.vectorResource(R.drawable.baseline_access_time_24))
 
-                Button(onClick = { /*vm.save()*/ onDismissRequest()},
+                Button(onClick = {
+                    vm.save(Restaurant(0, name.value, email.value, phone.value, address.value, open.value.toInt(), close.value.toInt(), null, null, null, 0),context)
+                    onDismissRequest()
+                                 },
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.dark_primary)),
                 ) {
                     Text(text="Mentés")
@@ -264,7 +271,8 @@ private fun DataField(text: String,valueNum: Int, imeAction: ImeAction, icon: Im
 fun UserInfo(){
     Row(modifier= Modifier
         .fillMaxWidth()
-        .background(colorResource(id = R.color.primary))){
+        .background(colorResource(id = R.color.primary))
+        .padding(vertical = 8.dp)){
         Image(
             modifier = Modifier
                 .fillMaxWidth(0.25f)
@@ -292,7 +300,7 @@ fun UserInfo(){
                 )
                 Text(
                     modifier = Modifier.padding(start = 8.dp, top = 5.dp),
-                    text = vm.user.phone,
+                    text = vm.user.phone?: "",
                     style = TextStyle(color = colorResource(id = R.color.primary_text))
                 )
                 if(vm.restaurantExist){
@@ -303,7 +311,7 @@ fun UserInfo(){
                     )
                 }
                 else{
-                    ClickableText(text = AnnotatedString("Find restaurant!"), onClick ={} )
+                    Text(text = AnnotatedString("Find restaurant!") )
                 }
             }
         }
@@ -314,11 +322,9 @@ fun UserInfo(){
 fun RestaurantInfo(){
         Column {
             Column{
-                Spacer(modifier = Modifier
-                    .height(260.dp)
-                    .fillMaxWidth())
+                val scroll = rememberScrollState(0)
                 Column(modifier = Modifier
-                    //.verticalScroll(scroll)
+                    .verticalScroll(scroll)
                     .fillMaxWidth()
                     .background(
                         colorResource(id = R.color.white),
@@ -379,14 +385,22 @@ fun RestaurantInfo(){
                             }
                         }
                     }
-                    Text(
-                        text=vm.restaurant.address,
-                        style = MaterialTheme.typography.displayMedium,
-                        modifier = Modifier.padding(start = 40.dp)
-                    )
                     Row(modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween) {
                         Column {
+                            Row(
+                                modifier = Modifier.padding(start = 30.dp,top = 5.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(R.drawable.baseline_map_24),
+                                    contentDescription = null
+                                )
+                                Text(
+                                    text = vm.restaurant.address,
+                                    modifier = Modifier.padding(start=10.dp)
+                                )
+                            }
                             Row(
                                 modifier = Modifier.padding(start = 30.dp, top = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically
@@ -413,16 +427,6 @@ fun RestaurantInfo(){
                                     modifier = Modifier.padding(start=10.dp)
                                 )
                             }
-                        }
-                        IconButton(onClick = {
-                            /*val route = Screen.ReservationScreen.route+"/"+vm.restaurant.id
-                            navController.navigate(route = route)*/ },
-                            modifier = Modifier.padding(end = 30.dp)){
-                            Icon(
-                                Icons.Rounded.List,
-                                contentDescription = null,
-                                tint = colorResource(id = R.color.secondary_text)
-                            )
                         }
                     }
                     if(vm.restaurant.menu_Food != null) {
@@ -458,8 +462,8 @@ fun MenuRow(list: List<MenuItem>, title: String, navController: NavController){
         Text(text=title,
             style= MaterialTheme.typography.headlineMedium,
             color = colorResource(id = R.color.secondary_text))
-        //val route = Screen.MenuScreen.route+"/"+title+"/"+ restaurantId
-        IconButton(onClick = {/*navController.navigate(route = route)*/},
+        val route = Screen.MenuScreen.route+"/"+title
+        IconButton(onClick = {navController.navigate(route = route)},
             modifier = Modifier
                 .size(10.dp)
                 .background(

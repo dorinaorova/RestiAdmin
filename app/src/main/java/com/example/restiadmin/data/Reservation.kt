@@ -6,6 +6,5 @@ data class Reservation(
     var user: User?,
     var date: Long,
     var time: Int,
-    var people: Int,
-    var state: StateEnum
+    var people: Int
 )

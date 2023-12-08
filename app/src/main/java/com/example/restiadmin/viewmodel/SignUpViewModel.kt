@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.restiadmin.api.LoginApi
 import com.example.restiadmin.data.User
+import com.example.restiadmin.navigation.Screen
 import kotlinx.coroutines.launch
 import retrofit2.awaitResponse
 
@@ -26,7 +27,8 @@ class SignUpViewModel : ViewModel() {
                 val response = call?.awaitResponse()
 
                 if(response?.isSuccessful == true){
-                    //navController.navigate(route = Screen.RestaurantListScreen.route)
+                    Toast.makeText(context,"Sikeres regisztráció", Toast.LENGTH_SHORT).show()
+                    navController.navigate(route = Screen.LoginScreen.route)
                     val sharedPref : SharedPreferences = context.getSharedPreferences("PREFERENCE_NAME",
                         Context.MODE_PRIVATE
                     )

@@ -2,6 +2,7 @@
 
 package com.example.restiadmin.screen
 
+import android.util.Log
 import android.widget.DatePicker
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
@@ -74,9 +75,11 @@ private var name  = mutableStateOf("")
 private var email = mutableStateOf("")
 private var phone = mutableStateOf("")
 private var password = mutableStateOf("")
+private var password2 = mutableStateOf("")
 private var date = mutableStateOf("")
-private var enabled = mutableStateOf(name.value.isNotEmpty() && email.value.isNotEmpty() && phone.value.isNotEmpty() && password.value.isNotEmpty())
 private var vm = SignUpViewModel()
+private var enabled = mutableStateOf(name.value.isNotEmpty() && email.value.isNotEmpty() && phone.value.isNotEmpty() && password.value.isNotEmpty())
+
 
 @Composable
 fun SignUpScreen(navController: NavController){
@@ -146,7 +149,7 @@ private fun Datas(scroll : ScrollState, navController: NavController) {
                 "Telefonszám",
                 Icons.Rounded.Phone,
                 2,
-                ImeAction.Done,
+                ImeAction.Next,
                 VisualTransformation.None
             )
             // TODO DatePicker()
@@ -154,6 +157,13 @@ private fun Datas(scroll : ScrollState, navController: NavController) {
                 "Jelszó",
                 Icons.Rounded.Lock,
                 3,
+                ImeAction.Next,
+                PasswordVisualTransformation()
+            )
+            DataField(
+                "Jelszó ismét",
+                Icons.Rounded.Lock,
+                4,
                 ImeAction.Done,
                 PasswordVisualTransformation()
             )
@@ -166,7 +176,9 @@ private fun Datas(scroll : ScrollState, navController: NavController) {
 //                        val df = SimpleDateFormat("yyyy.MM.dd")
 //                        val user= User(0,name.value, email.value, phone.value, password.value,df.parse(date.value).time)
 //                        vm.signUp(user,navController,context)
-                        navController.navigate(route = Screen.ProfileScreen.route)
+                        //navController.navigate(route = Screen.ProfileScreen.route)
+                        Log.d("USER", email.value+" - "+password.value)
+                        vm.signUp(User(0, name.value, email.value, phone.value, password.value, 0, "", "", ""), navController, context)
                     },
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.dark_primary)),
@@ -174,7 +186,7 @@ private fun Datas(scroll : ScrollState, navController: NavController) {
                         .fillMaxWidth()
                         .height(50.dp)
                         .padding(bottom = 10.dp),
-                    enabled = enabled.value || true //TODO
+                    enabled = enabled.value //TODO
 
                 ) {
                     Text(
@@ -193,6 +205,7 @@ private fun Datas(scroll : ScrollState, navController: NavController) {
 private fun DataField(text: String, icon: ImageVector, valueNum: Int, imeAction: ImeAction, visualTransformation: VisualTransformation){
     var value by remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
+    enabled.value = name.value.isNotEmpty() && email.value.isNotEmpty() && password.value.isNotEmpty() && password.value == password2.value
 
     Text(text=text,
         style = MaterialTheme.typography.headlineMedium,
@@ -201,7 +214,7 @@ private fun DataField(text: String, icon: ImageVector, valueNum: Int, imeAction:
     BasicTextField(
         value = value,
         onValueChange = {value = it
-            enabled.value = name.value.isNotEmpty() && email.value.isNotEmpty() && phone.value.isNotEmpty() && password.value.isNotEmpty() && date.value.isNotEmpty()
+
             when (valueNum) {
                 0 -> {
                     name.value = value
@@ -212,8 +225,11 @@ private fun DataField(text: String, icon: ImageVector, valueNum: Int, imeAction:
                 2 -> {
                     phone.value=value
                 }
-                else -> {
+                3 -> {
                     password.value=value
+                }
+                else ->{
+                    password2.value= value
                 }
             }
         },

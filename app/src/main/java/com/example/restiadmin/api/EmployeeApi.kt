@@ -9,7 +9,6 @@ import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -17,8 +16,8 @@ import retrofit2.http.Path
 private const val BASE_URL = "http://152.66.183.63:8080/employee/"
 interface EmployeeApi {
 
-    @POST("addemployee")
-    fun addEmployee(@Body request: EmployeeRequest) : Call<Restaurant>?
+    @POST("addemployee/{id}")
+    fun addEmployee(@Path("id") id: Long) : Call<Restaurant>?
 
     @POST("request/{restaurantId}/{userId}")
     fun requestEmployee(@Path("restaurantId") restaurantId: Long,@Path("userId") userId: Long ) : Call<EmployeeRequest>?
@@ -29,7 +28,7 @@ interface EmployeeApi {
     @GET("request/restaurant/{id}")
     fun requestRestaurant(@Path("id") id: Long) : Call<List<EmployeeRequest>>?
 
-    @GET("employee/{id}")
+    @GET("employees/{id}")
     fun findEmployees(@Path("id") id: Long) : Call<List<UserInfo>>?
 
     @GET("employees/free")

@@ -1,6 +1,7 @@
 package com.example.restiadmin.screen
 
 
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -30,6 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountCircle
 import androidx.compose.material.icons.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Email
+import androidx.compose.material.icons.rounded.ExitToApp
 import androidx.compose.material.icons.rounded.MailOutline
 import androidx.compose.material.icons.rounded.Phone
 import androidx.compose.material3.Button
@@ -72,6 +74,7 @@ import com.example.restiadmin.R
 import com.example.restiadmin.data.MenuItem
 import com.example.restiadmin.data.Restaurant
 import com.example.restiadmin.data.TypeEnum
+import com.example.restiadmin.data.requestmodel.EmployeeRequest
 import com.example.restiadmin.navController
 import com.example.restiadmin.navigation.Screen
 import com.example.restiadmin.screen.navbar.NavBar
@@ -111,6 +114,13 @@ fun ProfileScreen(navController: NavController){
                 .padding(paddingValues)){
                 Column {
                     UserInfo()
+                    LazyRow(modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()){
+                        items(vm.requests){
+                                item -> RequestItem(item)
+                        }
+                    }
                     if(vm.restaurantExist){
                         RestaurantInfo()
                     }else {
@@ -239,7 +249,7 @@ private fun DataField(text: String,valueNum: Int, imeAction: ImeAction, icon: Im
             decorationBox = { innerTextField ->
                 Row(
                     modifier = Modifier
-                        .padding(horizontal = 30.dp, vertical =6.dp)
+                        .padding(horizontal = 30.dp, vertical = 6.dp)
                         .fillMaxWidth()
                         .wrapContentHeight()
                         .background(
@@ -269,6 +279,7 @@ private fun DataField(text: String,valueNum: Int, imeAction: ImeAction, icon: Im
 
 @Composable
 fun UserInfo(){
+    val context = LocalContext.current
     Row(modifier= Modifier
         .fillMaxWidth()
         .background(colorResource(id = R.color.primary))
@@ -314,7 +325,38 @@ fun UserInfo(){
                     Text(text = AnnotatedString("Find restaurant!") )
                 }
             }
+            Column{
+                IconButton(onClick = {
+                    vm.logout(context)
+                    navController.navigate(route = Screen.LoginScreen.route){
+                        popUpTo(0)
+                    }
+                                     },
+                        modifier = Modifier
+                        .size(30.dp)
+                        .padding(5.dp)) {
+                    Icon(
+                        Icons.Rounded.ExitToApp,
+                        contentDescription = null,
+                        tint = colorResource(id = R.color.primary_text)
+                    )
+
+                }
+            }
         }
+    }
+}
+@Composable
+fun RequestItem(item: EmployeeRequest){
+    Log.d("ITEM", item.restaurant.name)
+    val context = LocalContext.current
+    Button(
+        onClick = { vm.acceptRequest(item.id, context)},
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.dark_primary)),
+        modifier = Modifier.padding(10.dp)
+    ) {
+        Text(text = item.restaurant.name)
     }
 }
 

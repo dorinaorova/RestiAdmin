@@ -18,6 +18,7 @@ interface UserApi {
     @GET("findbyid/{id}")
     fun finById(@Path("id") id: Long) : Call<User>?
 
+
     companion object {
         var apiService: UserApi? = null
         fun getInstance(context : Context): UserApi {

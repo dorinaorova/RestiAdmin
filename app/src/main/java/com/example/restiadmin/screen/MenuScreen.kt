@@ -162,7 +162,7 @@ private fun MenuList(title: String?, navController: NavController){
             Box(modifier = Modifier.fillMaxHeight(0.4f)) {
                 LazyColumn {
                     items(vm.requests) { item ->
-                        MenuListItem(item.item, true)
+                        MenuListItem(item.item, true, item.id)
                     }
                 }
             }
@@ -185,15 +185,15 @@ private fun MenuList(title: String?, navController: NavController){
         }
         LazyColumn {
             items(vm.menu){ item ->
-                MenuListItem(item, false)
+                MenuListItem(item, false, null)
             }
         }
     }
 }
 
 @Composable
-private fun MenuListItem(item: MenuItem, request: Boolean){
-    var context = LocalContext.current
+private fun MenuListItem(item: MenuItem, request: Boolean, id: Long?){
+    val context = LocalContext.current
     Box (modifier = Modifier
         .padding(vertical = 12.dp, horizontal = 8.dp)
         .background(color = Color.White, shape = RoundedCornerShape(size = 16.dp))
@@ -229,14 +229,14 @@ private fun MenuListItem(item: MenuItem, request: Boolean){
                         .padding(3.dp, 0.dp)
                         .wrapContentWidth()
                 ) {
-                    TextButton(onClick = { vm.addMenuItem(item.id, context , true)}) {
+                    TextButton(onClick = { vm.addMenuItem(id!!, context ,menuTitle=="Étlap" )}) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.baseline_add_task_24),
                             contentDescription = null,
                             tint = colorResource(id = R.color.dark_primary)
                         )
                     }
-                    TextButton(onClick = { vm.deleteRequest(item.id, context, false )}) {
+                    TextButton(onClick = { vm.deleteRequest(id!!, context, menuTitle=="Étlap" )}) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.baseline_delete_forever_24),
                             contentDescription = null,

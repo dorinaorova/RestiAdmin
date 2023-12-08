@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -15,9 +16,9 @@ import kotlinx.coroutines.launch
 import retrofit2.awaitResponse
 
 class EmployeesViewModel : ViewModel() {
-    private var _employees = mutableListOf<UserInfo>()
-    private var _requests = mutableListOf<EmployeeRequest>()
-    private var _users = mutableListOf<UserInfo>()
+    private var _employees = mutableStateListOf<UserInfo>()
+    private var _requests = mutableStateListOf<EmployeeRequest>()
+    private var _users = mutableStateListOf<UserInfo>()
     private var errorMessage: String by mutableStateOf("")
 
     val employees : List<UserInfo>
@@ -35,7 +36,7 @@ class EmployeesViewModel : ViewModel() {
 
     fun admin(context: Context): Boolean{
         val sharedPreferences = context.getSharedPreferences("USER", Context.MODE_PRIVATE)
-        return sharedPreferences.getString("ROLE", "").toString() === "ADMIN"
+        return sharedPreferences.getString("ROLE", "").toString() == "ADMIN"
     }
     private fun getRestaurantId(context: Context) : Long {
         val sharedPreferences = context.getSharedPreferences("USER", Context.MODE_PRIVATE)

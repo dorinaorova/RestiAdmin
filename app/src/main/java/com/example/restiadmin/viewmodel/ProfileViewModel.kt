@@ -5,20 +5,24 @@ import android.content.SharedPreferences
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.restiadmin.api.EmployeeApi
 import com.example.restiadmin.api.RestaurantApi
 import com.example.restiadmin.api.UserApi
 import com.example.restiadmin.data.Restaurant
 import com.example.restiadmin.data.User
+import com.example.restiadmin.data.requestmodel.EmployeeRequest
 import kotlinx.coroutines.launch
 import retrofit2.awaitResponse
 
 class ProfileViewModel : ViewModel() {
     private var _user = mutableStateOf(User(0L,"","","","",0L, "", "", "bearer"))
     private var _restaurant = mutableStateOf(Restaurant())
+    private var _requests = mutableStateListOf<EmployeeRequest>()
     private var _restaurantExist= mutableStateOf(false)
     var errorMessage: String by mutableStateOf("")
 
@@ -26,6 +30,8 @@ class ProfileViewModel : ViewModel() {
         get() = _user.value
     val restaurant: Restaurant
         get() = _restaurant.value
+    val requests: List<EmployeeRequest>
+        get() = _requests
 
     val restaurantExist : Boolean
         get() = _restaurantExist.value
@@ -37,6 +43,7 @@ class ProfileViewModel : ViewModel() {
 
     fun fetchDatas(context: Context){
         getUser(context)
+        findRequests(context)
         getRestaurant(context)
     }
     fun getUser(context: Context){
@@ -98,7 +105,7 @@ class ProfileViewModel : ViewModel() {
                 val response = call?.awaitResponse()
                 Log.d("RESPONSE", response.toString())
                 if(response?.isSuccessful == true){
-                    getRestaurant(context)
+                    fetchDatas(context)
                 }
                 else{
                     Toast.makeText(context, response?.message(), Toast.LENGTH_SHORT ).show()
@@ -108,6 +115,47 @@ class ProfileViewModel : ViewModel() {
                 Log.e("ERROR", errorMessage)
             }
         }
+    }
+
+    fun acceptRequest(id: Long, context: Context){
+        viewModelScope.launch {
+            try {
+                val api = EmployeeApi.getInstance(context)
+                val response = api.addEmployee(id)?.awaitResponse()
+                if(response?.isSuccessful==true){
+                    fetchDatas(context)
+                }else{
+                    Toast.makeText(context, response?.message(), Toast.LENGTH_SHORT ).show()
+                }
+                } catch (e: Exception) {
+                    errorMessage = e.toString()
+                    Log.e("ERROR", errorMessage)
+                }
+        }
+    }
+
+    fun findRequests(context: Context){
+        viewModelScope.launch {
+            try {
+                val api = EmployeeApi.getInstance(context)
+                val response = api.requestOwn(readId(context))?.awaitResponse()
+                if(response?.isSuccessful==true){
+                    response.body()?.forEach{item ->_requests.add(item) }
+                }else {
+                    Toast.makeText(context, response?.message(), Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                errorMessage = e.toString()
+                Log.e("ERROR", errorMessage)
+            }
+        }
+    }
+
+    fun logout(context: Context){
+        val sharedPreferences = context.getSharedPreferences("USER", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.clear()
+        editor.apply()
     }
 
 }

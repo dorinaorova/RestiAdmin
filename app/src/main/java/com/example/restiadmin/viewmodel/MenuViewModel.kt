@@ -96,11 +96,12 @@ class MenuViewModel  : ViewModel() {
                     }
                 if (response?.isSuccessful == true) {
                     Toast.makeText(context, "Success!", Toast.LENGTH_SHORT).show()
-                    getMenu(food, context)
-                    getRequests(food, context)
+
                 } else {
                     Toast.makeText(context, response?.message(), Toast.LENGTH_SHORT).show()
                 }
+                getMenu(food, context)
+                getRequests(food, context)
             } catch (e: Exception) {
                 errorMessage = e.toString()
                 Log.e("ERROR", errorMessage)
@@ -127,6 +128,8 @@ class MenuViewModel  : ViewModel() {
                 }else {
                     Toast.makeText(context, response?.message(), Toast.LENGTH_SHORT).show()
                 }
+                getMenu(food, context)
+                getRequests(food, context)
             } catch (e: Exception) {
                 errorMessage = e.toString()
                 Log.e("ERROR", errorMessage)
@@ -151,6 +154,8 @@ class MenuViewModel  : ViewModel() {
                 }else {
                     Toast.makeText(context, response?.message(), Toast.LENGTH_SHORT).show()
                 }
+                getMenu(food, context)
+                getRequests(food, context)
             } catch (e: Exception) {
                 errorMessage = e.toString()
                 Log.e("ERROR", errorMessage)

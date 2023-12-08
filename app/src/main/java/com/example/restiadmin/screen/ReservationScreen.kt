@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -165,23 +166,27 @@ private fun ReservationList(){
             .fillMaxSize()
             .background(colorResource(R.color.light_primary))
     ) {
-        LazyColumn {
-            items(vm.current){ item ->
-                ReservationItem(item, false)
+        Box(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.6f)) {
+            LazyColumn {
+                items(vm.current) { item ->
+                    ReservationItem(item, false)
+                }
             }
         }
         if(vm.current.isNotEmpty()) {
-            Canvas(
-                Modifier
-                    .fillMaxWidth()
-                    .height(1.dp)
-                    .padding(vertical = 20.dp)
-            ) {
-                drawLine(
-                    color = color,
-                    start = Offset(0f, 0f),
-                    end = Offset(size.width, 0f),
-                )
+            Box (modifier = Modifier.fillMaxWidth().fillMaxHeight(0.1f)){
+                Canvas(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .padding(vertical = 20.dp)
+                ) {
+                    drawLine(
+                        color = color,
+                        start = Offset(0f, 0f),
+                        end = Offset(size.width, 0f),
+                    )
+                }
             }
         }
         LazyColumn {
